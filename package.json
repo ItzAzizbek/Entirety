@@ -1,0 +1,75 @@
+{
+  "name": "entirety",
+  "version": "0.3.0",
+  "description": "One package to rule them all — lazy-load (and auto-install) any npm module through a single Proxy-powered namespace.",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./aliases": "./aliases.js",
+    "./bundles": "./bundles.js",
+    "./loader": {
+      "browser": "./loader-browser.js",
+      "default": "./loader.js"
+    },
+    "./plugin": "./plugin.js"
+  },
+  "imports": {
+    "#loader": {
+      "browser": "./loader-browser.js",
+      "default": "./loader.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "aliases.js",
+    "bundles.js",
+    "lazy.js",
+    "loader.js",
+    "loader-browser.js",
+    "plugin.js",
+    "generate-dts.js",
+    "README.md"
+  ],
+  "scripts": {
+    "example": "node example.mjs",
+    "test": "node example.mjs",
+    "generate-dts": "node generate-dts.js"
+  },
+  "keywords": [
+    "proxy",
+    "lazy",
+    "dynamic-import",
+    "namespace",
+    "esm",
+    "universal",
+    "meta-package"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "author": "Entirety contributors",
+  "peerDependenciesMeta": {
+    "lodash": {
+      "optional": true
+    },
+    "axios": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "@mui/material": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "magic-string": "^0.30.21",
+    "ms": "^2.1.3",
+    "nanoid": "^5.1.9"
+  },
+  "devDependencies": {
+    "lodash": "^4.17.21"
+  }
+}

@@ -1,0 +1,1052 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Docs · Entirety</title>
+<meta name="description" content="Complete documentation for entirety — install, usage, auto-install, API reference, troubleshooting." />
+<meta name="theme-color" content="#FFFFFF" />
+<link rel="icon" type="image/svg+xml" href="icon.svg" />
+
+<style>
+/* ─── Tokens (shared with landing) ─────────────────────────────────── */
+:root {
+  --bg:              #FFFFFF;
+  --bg-alt:          #F7F7F7;
+  --surface:         #FAFAFA;
+  --border:          rgba(0,0,0,0.09);
+  --border-strong:   rgba(0,0,0,0.22);
+  --text:            #000000;
+  --text-muted:      rgba(0,0,0,0.62);
+  --text-dim:        rgba(0,0,0,0.42);
+
+  --font-display: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+  --font-body:    "SF Pro Text", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+  --font-mono:    "SF Mono", "JetBrains Mono", Menlo, Monaco, "Cascadia Code", monospace;
+
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --nav-h: 68px;
+  --sidebar-w: 260px;
+}
+
+/* ─── Reset + base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+::selection { background: #000; color: #fff; }
+
+/* ─── Top nav ──────────────────────────────────────────────────────── */
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  height: var(--nav-h);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  background: rgba(255,255,255,0.78);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  height: 100%;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  font-size: 1.25rem;
+}
+.brand-dot {
+  width: 28px;
+  height: 28px;
+  display: block;
+  animation: float 4.2s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+.nav-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
+  margin-left: 4px;
+}
+.nav-links { display: flex; gap: 24px; align-items: center; }
+.nav-links a {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 200ms var(--ease);
+}
+.nav-links a:hover,
+.nav-links a.active { color: var(--text); }
+.nav-links a.pill {
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  font-weight: 600;
+}
+.nav-links a.pill:hover { color: #fff; transform: translateY(-1px); }
+@media (max-width: 720px) {
+  .nav-links a:not(.pill):not(.active) { display: none; }
+  .nav-tag { display: none; }
+}
+
+/* ─── Layout ───────────────────────────────────────────────────────── */
+.docs {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: calc(var(--nav-h) + 32px) 24px 80px;
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  gap: 64px;
+}
+@media (max-width: 1000px) {
+  .docs { grid-template-columns: 1fr; gap: 32px; }
+}
+
+/* ─── Sidebar ──────────────────────────────────────────────────────── */
+.sidebar {
+  position: sticky;
+  top: calc(var(--nav-h) + 24px);
+  align-self: start;
+  max-height: calc(100vh - var(--nav-h) - 48px);
+  overflow-y: auto;
+  padding-right: 12px;
+}
+.sidebar h6 {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 24px 0 8px;
+  font-weight: 700;
+}
+.sidebar h6:first-child { margin-top: 0; }
+.sidebar ul { list-style: none; padding: 0; margin: 0; }
+.sidebar li { margin: 0; }
+.sidebar a {
+  display: block;
+  padding: 5px 12px;
+  margin-left: -12px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  border-left: 2px solid transparent;
+  transition: color 180ms var(--ease), border-color 180ms var(--ease), background 180ms var(--ease);
+  border-radius: 0 6px 6px 0;
+}
+.sidebar a:hover { color: var(--text); background: rgba(0,0,0,0.03); }
+.sidebar a.active {
+  color: var(--text);
+  border-color: var(--text);
+  font-weight: 500;
+}
+@media (max-width: 1000px) {
+  .sidebar {
+    position: static;
+    max-height: none;
+    padding: 16px 18px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+  }
+  .sidebar-toggle {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 4px 0;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .sidebar[data-collapsed="true"] .sidebar-content { display: none; }
+}
+.sidebar-toggle { display: none; }
+.sidebar-toggle .chev { transition: transform 220ms var(--ease); }
+.sidebar[data-collapsed="false"] .sidebar-toggle .chev { transform: rotate(180deg); }
+
+/* Mobile-only outside-of-toc breadcrumb */
+.section-jump {
+  display: none;
+  margin: 0 0 20px;
+  font-size: 0.875rem;
+  color: var(--text-dim);
+}
+
+/* ─── Main content ─────────────────────────────────────────────────── */
+.main { max-width: 760px; min-width: 0; }
+
+.doc-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  display: block;
+}
+.doc-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin: 0 0 16px;
+}
+.doc-lede {
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  max-width: 60ch;
+  margin: 0 0 48px;
+}
+
+.main h2 {
+  font-family: var(--font-display);
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin: 96px 0 8px;
+  padding-top: 48px;
+  border-top: 1px solid var(--border);
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+}
+.main h2:first-of-type { border: 0; padding-top: 0; margin-top: 32px; }
+.main h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 40px 0 8px;
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+}
+.main h4 {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  margin: 28px 0 6px;
+  color: var(--text);
+}
+.main p {
+  margin: 0 0 16px;
+  color: var(--text-muted);
+}
+.main p strong { color: var(--text); font-weight: 600; }
+.main ul, .main ol { color: var(--text-muted); margin: 0 0 20px; padding-left: 22px; }
+.main li { margin: 4px 0; }
+.main li > p { margin: 4px 0; }
+.main hr { border: 0; border-top: 1px solid var(--border); margin: 48px 0; }
+
+/* anchor link on heading hover */
+.heading-anchor {
+  margin-left: 8px;
+  color: var(--text-dim);
+  font-weight: 400;
+  opacity: 0;
+  transition: opacity 180ms var(--ease);
+  text-decoration: none;
+}
+h2:hover .heading-anchor,
+h3:hover .heading-anchor,
+h4:hover .heading-anchor { opacity: 1; }
+
+/* Inline code */
+.main code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(0,0,0,0.05);
+  color: var(--text);
+  word-break: break-word;
+}
+.main pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 1em;
+}
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.8125em;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: #fff;
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+  color: var(--text);
+}
+
+/* ─── Code window (shared with landing) ────────────────────────────── */
+.window {
+  background: #FAFAFA;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.02) inset,
+    0 18px 40px -24px rgba(0,0,0,0.18);
+  overflow: hidden;
+  text-align: left;
+  margin: 12px 0 24px;
+  transition: box-shadow 380ms var(--ease-out), transform 380ms var(--ease-out);
+}
+.window:hover { box-shadow: 0 0 0 1px rgba(0,0,0,0.02) inset, 0 24px 48px -22px rgba(0,0,0,0.22); }
+.window-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.025);
+  border-bottom: 1px solid var(--border);
+}
+.dot { width: 11px; height: 11px; border-radius: 50%; background: rgba(0,0,0,0.18); }
+.window-title {
+  margin-left: 10px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+.window pre {
+  margin: 0;
+  padding: 18px 22px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  white-space: pre;
+  overflow-x: auto;
+  color: var(--text);
+}
+.window pre.wrap { white-space: pre-wrap; word-break: break-word; }
+
+/* Syntax tokens (GitHub-light) */
+.tok-cmt { color: #6E7781; font-style: italic; }
+.tok-kw  { color: #CF222E; }
+.tok-str { color: #0A3069; }
+.tok-num { color: #0550AE; }
+.tok-fn  { color: #8250DF; }
+.tok-id  { color: #1F2328; }
+.tok-op  { color: rgba(31,35,40,0.55); }
+.tok-out { color: #116329; }
+.tok-sys { color: #0969DA; }
+
+/* ─── Callouts ─────────────────────────────────────────────────────── */
+.callout {
+  position: relative;
+  padding: 14px 18px 14px 48px;
+  margin: 16px 0 24px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--text);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: rgba(0,0,0,0.02);
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+}
+.callout p { margin: 0 0 8px; color: var(--text-muted); }
+.callout p:last-child { margin-bottom: 0; }
+.callout strong { color: var(--text); }
+.callout::before {
+  position: absolute;
+  left: 18px;
+  top: 14px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.callout.info::before    { content: "Info"; }
+.callout.tip::before     { content: "Tip"; }
+.callout.warning::before { content: "Heads up"; }
+.callout.danger::before  { content: "Caution"; }
+.callout.warning { background: rgba(0,0,0,0.04); }
+.callout.danger  { border-left-width: 4px; background: #000; color: #fff; border-color: #000; }
+.callout.danger::before { color: #fff; }
+.callout.danger strong  { color: #fff; }
+.callout.danger p       { color: rgba(255,255,255,0.78); }
+
+/* ─── Tables ───────────────────────────────────────────────────────── */
+.docs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0 24px;
+  font-size: 0.9375rem;
+}
+.docs-table th, .docs-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.docs-table th {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-strong);
+}
+.docs-table td { color: var(--text-muted); }
+.docs-table td code, .docs-table th code {
+  background: rgba(0,0,0,0.05);
+  font-size: 0.85em;
+}
+.docs-table tr:last-child td { border-bottom: 0; }
+
+/* ─── Method signature card ────────────────────────────────────────── */
+.method {
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  margin: 12px 0 16px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ─── Footer ───────────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 36px 24px;
+  color: var(--text-dim);
+  font-size: 0.875rem;
+}
+footer .footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+footer a { color: var(--text-muted); transition: color 180ms var(--ease); }
+footer a:hover { color: var(--text); }
+footer .links { display: flex; gap: 24px; flex-wrap: wrap; }
+
+footer .footer-credit {
+  flex-basis: 100%;
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+  color: var(--text-dim);
+  letter-spacing: 0.01em;
+}
+footer .footer-credit a {
+  color: var(--text);
+  font-weight: 600;
+  margin-left: 4px;
+  position: relative;
+  display: inline-block;
+}
+footer .footer-credit a::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 280ms var(--ease-out);
+}
+footer .footer-credit a:hover::after { transform: scaleX(1); }
+
+/* ─── Reveal (scroll-triggered) ────────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out); }
+.reveal.in { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ─── Top nav ─────────────────────────────────────────────────────── -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="brand">
+      <img class="brand-dot" src="icon.svg" alt="" aria-hidden="true" />
+      <span>Entirety</span>
+      <span class="nav-tag">Docs</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="docs.html" class="active">Docs</a>
+      <a href="https://www.npmjs.com/package/entirety" target="_blank" rel="noopener">npm</a>
+      <a href="https://github.com/" target="_blank" rel="noopener" class="pill">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── Layout ──────────────────────────────────────────────────────── -->
+<div class="docs">
+
+  <!-- Sidebar TOC -->
+  <aside class="sidebar" id="sidebar" data-collapsed="false">
+    <button class="sidebar-toggle" type="button" aria-controls="sidebar-content" aria-expanded="true">
+      <span>On this page</span>
+      <span class="chev" aria-hidden="true">▾</span>
+    </button>
+    <div class="sidebar-content" id="sidebar-content">
+      <h6>Getting started</h6>
+      <ul>
+        <li><a href="#install">Install</a></li>
+        <li><a href="#hello-world">Hello, world</a></li>
+        <li><a href="#requirements">Requirements</a></li>
+      </ul>
+      <h6>Usage</h6>
+      <ul>
+        <li><a href="#chained-call">Chained call</a></li>
+        <li><a href="#await-then-use">Await then use</a></li>
+        <li><a href="#function-reference">Function references</a></li>
+        <li><a href="#callable-modules">Calling the module</a></li>
+        <li><a href="#use-without-alias">Without aliases</a></li>
+        <li><a href="#custom-aliases">Custom aliases</a></li>
+      </ul>
+      <h6>Frameworks & Features</h6>
+      <ul>
+        <li><a href="#react-and-next">React & Bundlers</a></li>
+        <li><a href="#browser-support">Browser Support</a></li>
+        <li><a href="#alias-bundles">Alias Bundles</a></li>
+        <li><a href="#typescript">TypeScript Autocomplete</a></li>
+      </ul>
+      <h6>Auto-install</h6>
+      <ul>
+        <li><a href="#how-auto-install-works">How it works</a></li>
+        <li><a href="#auto-install-config">Configuration</a></li>
+        <li><a href="#env-vars">Environment variables</a></li>
+        <li><a href="#disabling-auto-install">Disabling</a></li>
+      </ul>
+      <h6>API reference</h6>
+      <ul>
+        <li><a href="#api-alias">Entirety.&lt;Alias&gt;</a></li>
+        <li><a href="#api-use">Entirety.use()</a></li>
+        <li><a href="#api-callable">Entirety()</a></li>
+        <li><a href="#api-register">Entirety.register()</a></li>
+        <li><a href="#api-aliases">Entirety.aliases</a></li>
+        <li><a href="#api-configure">Entirety.configure()</a></li>
+        <li><a href="#api-config">Entirety.config</a></li>
+        <li><a href="#api-clearcache">Entirety.clearCache()</a></li>
+      </ul>
+      <h6>Reference</h6>
+      <ul>
+        <li><a href="#limitations">Limitations</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+
+    <span class="doc-eyebrow">Documentation · v0.3</span>
+    <h1 class="doc-title">Everything Entirety can do.</h1>
+    <p class="doc-lede">A complete reference for installing, using, configuring, and understanding the package.</p>
+
+    <!-- ═══ GETTING STARTED ═══ -->
+    <h2 id="install">Install <a href="#install" class="heading-anchor" aria-label="Permalink">#</a></h2>
+    <p>Entirety has zero runtime dependencies. Install it like any other package:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">terminal</span></div>
+      <pre><span class="tok-op">$</span> npm install entirety</pre>
+    </div>
+    <p>Or with your preferred package manager:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">terminal</span></div>
+      <pre><span class="tok-op">$</span> pnpm add entirety
+<span class="tok-op">$</span> yarn add entirety
+<span class="tok-op">$</span> bun add entirety</pre>
+    </div>
+    <p>You don't need to install <code>lodash</code>, <code>axios</code>, or any other library upfront. Entirety installs them automatically the first time you reach for them — see <a href="#how-auto-install-works">Auto-install</a>.</p>
+
+    <h2 id="hello-world">Hello, world <a href="#hello-world" class="heading-anchor">#</a></h2>
+    <p>Create an ESM file and run it:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">index.js</span></div>
+<pre><span class="tok-kw">import</span> <span class="tok-id">Entirety</span> <span class="tok-kw">from</span> <span class="tok-str">"entirety"</span>;
+
+<span class="tok-id">console</span>.<span class="tok-fn">log</span>(<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">Lodash</span>.<span class="tok-fn">camelCase</span>(<span class="tok-str">"hello world"</span>));
+<span class="tok-cmt">// → "helloWorld"</span></pre>
+    </div>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">terminal</span></div>
+<pre><span class="tok-op">$</span> node index.js
+<span class="tok-sys">[entirety] installing lodash via npm…</span>
+<span class="tok-out">helloWorld</span></pre>
+    </div>
+    <p>That's it. The first run is slower because <code>lodash</code> is being installed on your behalf. Every subsequent run is instant.</p>
+
+    <h2 id="requirements">Requirements <a href="#requirements" class="heading-anchor">#</a></h2>
+    <ul>
+      <li><strong>Node.js 20 or later.</strong> Native ESM dynamic <code>import()</code> is required.</li>
+      <li><strong>An ESM project.</strong> Either set <code>"type": "module"</code> in your <code>package.json</code> or use the <code>.mjs</code> extension.</li>
+      <li><strong>A reachable <code>package.json</code>.</strong> Auto-install walks up from your <code>process.cwd()</code> looking for one. If none exists, Entirety still works for already-installed packages but can't install new ones.</li>
+      <li><strong>Network on first use of a missing package.</strong> Once installed, subsequent runs are offline.</li>
+    </ul>
+
+    <!-- ═══ USAGE ═══ -->
+    <h2 id="chained-call">Chained call <a href="#chained-call" class="heading-anchor">#</a></h2>
+    <p>The most common pattern. Property access is lazy; the <code>await</code> at the call site loads the package, walks the path, and invokes the function.</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">index.js</span></div>
+<pre><span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">Lodash</span>.<span class="tok-fn">camelCase</span>(<span class="tok-str">"hello world"</span>);  <span class="tok-cmt">// "helloWorld"</span>
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">Lodash</span>.<span class="tok-fn">range</span>(<span class="tok-num">5</span>);                    <span class="tok-cmt">// [0, 1, 2, 3, 4]</span>
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">Axios</span>.<span class="tok-fn">get</span>(<span class="tok-str">"/api/user"</span>);          <span class="tok-cmt">// { data: …, status: … }</span></pre>
+    </div>
+    <p>Nothing is loaded, parsed, or instantiated until you <code>await</code>. Unused libraries cost zero.</p>
+
+    <h2 id="await-then-use">Await then use <a href="#await-then-use" class="heading-anchor">#</a></h2>
+    <p>If you need to call many methods on the same library, resolve it once and re-use it synchronously:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">index.js</span></div>
+<pre><span class="tok-kw">const</span> <span class="tok-id">_</span> <span class="tok-op">=</span> <span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">Lodash</span>;
+
+<span class="tok-id">_</span>.<span class="tok-fn">capitalize</span>(<span class="tok-str">"entirety"</span>);   <span class="tok-cmt">// "Entirety"</span>
+<span class="tok-id">_</span>.<span class="tok-fn">range</span>(<span class="tok-num">5</span>);                 <span class="tok-cmt">// [0, 1, 2, 3, 4]</span>
+<span class="tok-id">_</span>.<span class="tok-fn">isEqual</span>([<span class="tok-num">1</span>], [<span class="tok-num">1</span>]);          <span class="tok-cmt">// true</span></pre>
+    </div>
+    <div class="callout info">
+      <p><strong>What you get back is a smart wrapper.</strong> Awaiting <code>Entirety.X</code> returns an object that prefers <code>module.default</code> as the base (so <code>_(...)</code> still calls lodash) but overlays named exports. This means <code>_.foo</code> works whether <code>foo</code> is a named export or a property of the default.</p>
+    </div>
+
+    <h2 id="function-reference">Function references <a href="#function-reference" class="heading-anchor">#</a></h2>
+    <p>If you only need one method, grab it directly:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">index.js</span></div>
+<pre><span class="tok-kw">const</span> <span class="tok-id">camelCase</span> <span class="tok-op">=</span> <span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">Lodash</span>.<span class="tok-id">camelCase</span>;
+
+[<span class="tok-str">"hello world"</span>, <span class="tok-str">"foo bar"</span>].<span class="tok-fn">map</span>(<span class="tok-id">camelCase</span>);
+<span class="tok-cmt">// ["helloWorld", "fooBar"]</span></pre>
+    </div>
+    <p>Same idea works for components and constants:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">app.js</span></div>
+<pre><span class="tok-kw">const</span> <span class="tok-id">useState</span>  <span class="tok-op">=</span> <span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">React</span>.<span class="tok-id">useState</span>;
+<span class="tok-kw">const</span> <span class="tok-id">Button</span>    <span class="tok-op">=</span> <span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">MUI</span>.<span class="tok-id">Button</span>;</pre>
+    </div>
+
+    <h2 id="callable-modules">Calling the module <a href="#callable-modules" class="heading-anchor">#</a></h2>
+    <p>Some packages export a function as their main shape (<code>axios</code>, <code>dayjs</code>, <code>ms</code>). Call them directly:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">index.js</span></div>
+<pre><span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">Axios</span>({ <span class="tok-id">url</span>: <span class="tok-str">"/api/user"</span>, <span class="tok-id">method</span>: <span class="tok-str">"POST"</span> });
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-fn">use</span>(<span class="tok-str">"ms"</span>)(<span class="tok-str">"2 days"</span>);   <span class="tok-cmt">// 172800000</span></pre>
+    </div>
+    <div class="callout info">
+      <p><strong>Empty calls prime, they don't invoke.</strong> Writing <code>Entirety.Lodash()</code> with no arguments returns a fresh chainable handle. That's why the bonus pattern <code>Entirety.Lodash().camelCase("hi")</code> works.</p>
+    </div>
+
+    <h2 id="use-without-alias">Without aliases <a href="#use-without-alias" class="heading-anchor">#</a></h2>
+    <p>You aren't limited to the four built-in aliases. Reach any npm specifier with <code>Entirety.use()</code>:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">index.js</span></div>
+<pre><span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-fn">use</span>(<span class="tok-str">"nanoid"</span>).<span class="tok-fn">nanoid</span>();
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-fn">use</span>(<span class="tok-str">"@scope/some-pkg"</span>).<span class="tok-fn">helper</span>();
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-fn">use</span>(<span class="tok-str">"node:crypto"</span>).<span class="tok-fn">randomUUID</span>();</pre>
+    </div>
+    <p>The <code>Entirety()</code> shorthand does the same thing:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">index.js</span></div>
+<pre><span class="tok-kw">await</span> <span class="tok-id">Entirety</span>(<span class="tok-str">"zod"</span>).<span class="tok-id">z</span>.<span class="tok-fn">string</span>();</pre>
+    </div>
+
+    <h2 id="custom-aliases">Custom aliases <a href="#custom-aliases" class="heading-anchor">#</a></h2>
+    <p>Add aliases at runtime so you can reach a package as <code>Entirety.MyName</code>:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">index.js</span></div>
+<pre><span class="tok-id">Entirety</span>.<span class="tok-fn">register</span>(<span class="tok-str">"Day"</span>, <span class="tok-str">"dayjs"</span>);
+<span class="tok-id">Entirety</span>.<span class="tok-fn">register</span>({ <span class="tok-id">Zod</span>: <span class="tok-str">"zod"</span>, <span class="tok-id">Nano</span>: <span class="tok-str">"nanoid"</span> });
+
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">Day</span>().<span class="tok-fn">format</span>(<span class="tok-str">"YYYY-MM-DD"</span>);
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">Nano</span>.<span class="tok-fn">nanoid</span>();</pre>
+    </div>
+    <p><code>Entirety.extend()</code> is an alias for <code>register()</code>.</p>
+
+    <!-- ═══ FRAMEWORKS & FEATURES ═══ -->
+    <h2 id="react-and-next">React & Bundlers <a href="#react-and-next" class="heading-anchor">#</a></h2>
+    <p>If you're using React, Next.js, or any frontend bundler (Vite, Rollup, Webpack), dynamic resolution limits their ability to bundle. Entirety ships with a <strong>Vite / Rollup plugin</strong> that transforms Entirety calls into standard static imports at build time, resulting in perfect tree-shaking for your client builds.</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">vite.config.js</span></div>
+<pre><span class="tok-kw">import</span> <span class="tok-id">entiretyPlugin</span> <span class="tok-kw">from</span> <span class="tok-str">"entirety/plugin"</span>;
+
+<span class="tok-kw">export</span> <span class="tok-kw">default</span> {
+  <span class="tok-id">plugins</span>: [
+    <span class="tok-fn">entiretyPlugin</span>()
+  ]
+};</pre>
+    </div>
+    <p>Now, <code>await Entirety.Lodash.camelCase()</code> behaves magically during development but transforms into a strict <code>import { camelCase } from "lodash"</code> at build time.</p>
+
+    <h2 id="browser-support">Browser Support <a href="#browser-support" class="heading-anchor">#</a></h2>
+    <p>Entirety includes a drop-in adapter making it work universally without a Node resolver! Bundlers will resolve <code>entirety/loader</code> to the browser-safe variant using conditional exports, preventing <code>child_process</code> dependencies from creeping into your client code.</p>
+
+    <h2 id="alias-bundles">Alias Bundles <a href="#alias-bundles" class="heading-anchor">#</a></h2>
+    <p>Entirety ships with curated maps of popular dependencies to save you time. Import them from <code>entirety/bundles</code>:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">index.js</span></div>
+<pre><span class="tok-kw">import</span> <span class="tok-id">Entirety</span> <span class="tok-kw">from</span> <span class="tok-str">"entirety"</span>;
+<span class="tok-kw">import</span> { <span class="tok-id">ReactKit</span>, <span class="tok-id">DataScience</span> } <span class="tok-kw">from</span> <span class="tok-str">"entirety/bundles"</span>;
+
+<span class="tok-id">Entirety</span>.<span class="tok-fn">register</span>(<span class="tok-id">ReactKit</span>);
+
+<span class="tok-kw">const</span> <span class="tok-id">motion</span> <span class="tok-op">=</span> <span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">Framer</span>.<span class="tok-id">motion</span>;
+<span class="tok-kw">const</span> <span class="tok-id">useState</span> <span class="tok-op">=</span> <span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">React</span>.<span class="tok-id">useState</span>;</pre>
+    </div>
+
+    <h2 id="typescript">TypeScript Autocomplete <a href="#typescript" class="heading-anchor">#</a></h2>
+    <p>Get editor autocomplete for aliases without needing to install the individual packages beforehand by generating declarations!</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">terminal</span></div>
+<pre><span class="tok-op">$</span> npx entirety generate-dts</pre>
+    </div>
+    <p>This generates an <code>entirety-env.d.ts</code> in your project root, unlocking full TypeScript support on your custom mappings!</p>
+
+    <!-- ═══ AUTO-INSTALL ═══ -->
+    <h2 id="how-auto-install-works">How auto-install works <a href="#how-auto-install-works" class="heading-anchor">#</a></h2>
+    <p>When you reference a package that isn't in <code>node_modules</code>, Entirety:</p>
+    <ol>
+      <li>Catches the <code>ERR_MODULE_NOT_FOUND</code> from <code>import()</code>.</li>
+      <li>Walks up from <code>process.cwd()</code> looking for the nearest <code>package.json</code>.</li>
+      <li>Detects which package manager invoked Node by reading <code>npm_config_user_agent</code>; falls back to lockfile sniffing (<code>bun.lockb</code>, <code>pnpm-lock.yaml</code>, <code>yarn.lock</code>); else npm.</li>
+      <li>Spawns the appropriate install command (<code>npm install &lt;pkg&gt;</code>, <code>pnpm add</code>, <code>yarn add</code>, <code>bun add</code>).</li>
+      <li>Once it exits successfully, retries the original <code>import()</code>.</li>
+    </ol>
+    <p>The whole installer runs once per package per session, deduplicated through Entirety's Promise cache.</p>
+
+    <h2 id="auto-install-config">Configuration <a href="#auto-install-config" class="heading-anchor">#</a></h2>
+    <p>Most projects need no configuration. Override behaviour with <code>Entirety.configure()</code>:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">setup.js</span></div>
+<pre><span class="tok-id">Entirety</span>.<span class="tok-fn">configure</span>({
+  <span class="tok-id">autoInstall</span>: <span class="tok-kw">true</span>,        <span class="tok-cmt">// default true</span>
+  <span class="tok-id">packageManager</span>: <span class="tok-str">"pnpm"</span>,    <span class="tok-cmt">// force pnpm regardless of detection</span>
+  <span class="tok-id">installCwd</span>: <span class="tok-str">"/srv/app"</span>,    <span class="tok-cmt">// install into a different directory</span>
+  <span class="tok-id">silent</span>: <span class="tok-kw">false</span>,            <span class="tok-cmt">// hide installer output</span>
+});</pre>
+    </div>
+    <p>Read the current effective settings:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">setup.js</span></div>
+<pre><span class="tok-id">console</span>.<span class="tok-fn">log</span>(<span class="tok-id">Entirety</span>.<span class="tok-id">config</span>);
+<span class="tok-cmt">// { autoInstall: true, packageManager: null, installCwd: null, silent: false }</span></pre>
+    </div>
+
+    <h2 id="env-vars">Environment variables <a href="#env-vars" class="heading-anchor">#</a></h2>
+    <p>Useful for CI, Docker, and one-off invocations without code changes.</p>
+    <table class="docs-table">
+      <thead>
+        <tr><th>Variable</th><th>Effect</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>ENTIRETY_NO_INSTALL=1</code></td><td>Strict mode — error on missing packages instead of installing.</td></tr>
+        <tr><td><code>ENTIRETY_PM=pnpm</code></td><td>Force a specific package manager (<code>npm</code> / <code>pnpm</code> / <code>yarn</code> / <code>bun</code>).</td></tr>
+        <tr><td><code>ENTIRETY_CWD=/path</code></td><td>Use a specific directory as the install target.</td></tr>
+        <tr><td><code>ENTIRETY_SILENT=1</code></td><td>Suppress the <code>[entirety] installing …</code> banner and installer stdout.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="disabling-auto-install">Disabling <a href="#disabling-auto-install" class="heading-anchor">#</a></h2>
+    <p>For CI pipelines, locked-down builds, or read-only filesystems, disable auto-install:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">terminal</span></div>
+<pre><span class="tok-op">$</span> ENTIRETY_NO_INSTALL=1 node app.js</pre>
+    </div>
+    <p>Missing packages now produce an actionable error instead:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">stderr</span></div>
+<pre>Error: Entirety: package <span class="tok-str">'lodash'</span> is not installed.
+  Install it with:  npm install lodash
+  Or enable auto-install (remove ENTIRETY_NO_INSTALL from the env).</pre>
+    </div>
+
+    <!-- ═══ API REFERENCE ═══ -->
+    <h2 id="api-alias">Entirety.&lt;Alias&gt; <a href="#api-alias" class="heading-anchor">#</a></h2>
+    <div class="method">Entirety.&lt;Alias&gt; → LazyModule</div>
+    <p>Returns a chainable, awaitable, callable handle bound to the package mapped to <code>Alias</code>. Built-in aliases:</p>
+    <table class="docs-table">
+      <thead><tr><th>Alias</th><th>Specifier</th></tr></thead>
+      <tbody>
+        <tr><td><code>Entirety.Lodash</code></td><td><code>lodash</code></td></tr>
+        <tr><td><code>Entirety.Axios</code></td><td><code>axios</code></td></tr>
+        <tr><td><code>Entirety.React</code></td><td><code>react</code></td></tr>
+        <tr><td><code>Entirety.MUI</code></td><td><code>@mui/material</code></td></tr>
+      </tbody>
+    </table>
+    <p>Add more with <a href="#api-register"><code>Entirety.register()</code></a>.</p>
+
+    <h2 id="api-use">Entirety.use(name) <a href="#api-use" class="heading-anchor">#</a></h2>
+    <div class="method">Entirety.use(name: string) → LazyModule</div>
+    <p>Reach a package by raw npm specifier (or alias name). If <code>name</code> matches a registered alias the alias is used; otherwise the string is passed straight to <code>import()</code>.</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">index.js</span></div>
+<pre><span class="tok-id">Entirety</span>.<span class="tok-fn">use</span>(<span class="tok-str">"lodash"</span>);             <span class="tok-cmt">// alias-resolved</span>
+<span class="tok-id">Entirety</span>.<span class="tok-fn">use</span>(<span class="tok-str">"nanoid"</span>);             <span class="tok-cmt">// not aliased — used as-is</span>
+<span class="tok-id">Entirety</span>.<span class="tok-fn">use</span>(<span class="tok-str">"@radix-ui/react-dropdown-menu"</span>);
+<span class="tok-id">Entirety</span>.<span class="tok-fn">use</span>(<span class="tok-str">"node:crypto"</span>);       <span class="tok-cmt">// works for built-ins too</span></pre>
+    </div>
+
+    <h2 id="api-callable">Entirety(name) <a href="#api-callable" class="heading-anchor">#</a></h2>
+    <div class="method">Entirety(name: string) → LazyModule</div>
+    <p>Identical to <code>Entirety.use(name)</code>, available for terser sites:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">index.js</span></div>
+<pre><span class="tok-kw">await</span> <span class="tok-id">Entirety</span>(<span class="tok-str">"zod"</span>).<span class="tok-id">z</span>.<span class="tok-fn">string</span>().<span class="tok-fn">parse</span>(<span class="tok-id">x</span>);</pre>
+    </div>
+
+    <h2 id="api-register">Entirety.register() <a href="#api-register" class="heading-anchor">#</a></h2>
+    <div class="method">Entirety.register(name: string, pkg: string): void
+Entirety.register(map: Record&lt;string, string&gt;): void</div>
+    <p>Adds (or overwrites) aliases in the runtime alias map. Two call shapes — single pair, or a record.</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">index.js</span></div>
+<pre><span class="tok-id">Entirety</span>.<span class="tok-fn">register</span>(<span class="tok-str">"Day"</span>, <span class="tok-str">"dayjs"</span>);
+
+<span class="tok-id">Entirety</span>.<span class="tok-fn">register</span>({
+  <span class="tok-id">Zod</span>:    <span class="tok-str">"zod"</span>,
+  <span class="tok-id">Crypto</span>: <span class="tok-str">"node:crypto"</span>,
+});</pre>
+    </div>
+    <p><code>Entirety.extend()</code> is the same function under a different name.</p>
+
+    <h2 id="api-aliases">Entirety.aliases <a href="#api-aliases" class="heading-anchor">#</a></h2>
+    <div class="method">Entirety.aliases → Record&lt;string, string&gt;</div>
+    <p>Returns a snapshot of the current alias map. Mutations to the returned object don't affect Entirety — use <code>register()</code> for that.</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">repl</span></div>
+<pre>&gt; <span class="tok-id">Entirety</span>.<span class="tok-id">aliases</span>
+{ <span class="tok-id">Lodash</span>: <span class="tok-str">'lodash'</span>, <span class="tok-id">Axios</span>: <span class="tok-str">'axios'</span>, <span class="tok-id">React</span>: <span class="tok-str">'react'</span>, <span class="tok-id">MUI</span>: <span class="tok-str">'@mui/material'</span> }</pre>
+    </div>
+
+    <h2 id="api-configure">Entirety.configure() <a href="#api-configure" class="heading-anchor">#</a></h2>
+    <div class="method">Entirety.configure(options: Partial&lt;Config&gt;): Config</div>
+    <p>Merges the partial options object into the live config. Returns the new effective config.</p>
+    <table class="docs-table">
+      <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td><code>autoInstall</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Install missing packages on first access.</td></tr>
+        <tr><td><code>packageManager</code></td><td><code>string</code></td><td>auto-detect</td><td><code>"npm" | "pnpm" | "yarn" | "bun"</code></td></tr>
+        <tr><td><code>installCwd</code></td><td><code>string</code></td><td>nearest <code>package.json</code> up</td><td>Where to install.</td></tr>
+        <tr><td><code>silent</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Hide installer output.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="api-config">Entirety.config <a href="#api-config" class="heading-anchor">#</a></h2>
+    <div class="method">Entirety.config → Config (snapshot)</div>
+    <p>Read-only snapshot of the current effective config. Useful for diagnostics.</p>
+
+    <h2 id="api-clearcache">Entirety.clearCache() <a href="#api-clearcache" class="heading-anchor">#</a></h2>
+    <div class="method">Entirety.clearCache(): void</div>
+    <p>Drops every cached <code>import()</code> Promise. Mostly useful in tests where you need to re-trigger module loading.</p>
+    <div class="callout warning">
+      <p>This does <strong>not</strong> delete <code>node_modules/&lt;pkg&gt;</code>. It only clears Entirety's in-memory cache. Subsequent accesses will re-import (very fast — Node still has the module in its loader cache).</p>
+    </div>
+
+    <!-- ═══ REFERENCE ═══ -->
+    <h2 id="limitations">Limitations <a href="#limitations" class="heading-anchor">#</a></h2>
+    <ul>
+      <li><strong>Async everywhere.</strong> ESM <code>import()</code> is asynchronous, so top-level access must be <code>await</code>ed. Sync use is possible <em>after</em> one initial await.</li>
+      <li><strong>Side-effect ordering.</strong> Packages whose import side-effects you rely on will execute at <em>first access</em>, not at <code>import "entirety"</code>. Usually what you want, occasionally not.</li>
+      <li><strong>First-use install latency.</strong> The first access to a missing package blocks on <code>npm install</code> (seconds). Cached thereafter. Pre-install the common ones if this matters, or ship with a warm <code>node_modules</code>.</li>
+      <li><strong>Network required for first use.</strong> Offline CI that touches a missing package will fail; pin deps ahead of time or use <code>ENTIRETY_NO_INSTALL=1</code>.</li>
+    </ul>
+
+    <h2 id="troubleshooting">Troubleshooting <a href="#troubleshooting" class="heading-anchor">#</a></h2>
+
+    <h3>"Entirety package alias 'X' is not configured"</h3>
+    <p>You used a property name that isn't in the alias map. Either register it, or use <code>Entirety.use("real-pkg-name")</code>:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">fix.js</span></div>
+<pre><span class="tok-id">Entirety</span>.<span class="tok-fn">register</span>(<span class="tok-str">"X"</span>, <span class="tok-str">"actual-package-name"</span>);
+<span class="tok-cmt">// or</span>
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-fn">use</span>(<span class="tok-str">"actual-package-name"</span>).<span class="tok-fn">method</span>();</pre>
+    </div>
+
+    <h3>"&lt;path&gt; is not a function (property not found)"</h3>
+    <p>The chained property doesn't exist on the module. Two common causes:</p>
+    <ol>
+      <li>Typo in the method name. Try <code>Object.keys(await Entirety.X)</code>.</li>
+      <li>The method is an instance method, not a module export — e.g. <code>dayjs().format()</code>. Resolve the module first, instantiate, then call.</li>
+    </ol>
+
+    <h3>Auto-install fails with "no package.json found"</h3>
+    <p>You're running Node from a directory without a <code>package.json</code> in the parent tree. Create one:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">terminal</span></div>
+<pre><span class="tok-op">$</span> npm init -y</pre>
+    </div>
+    <p>Or override the install location:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">terminal</span></div>
+<pre><span class="tok-op">$</span> ENTIRETY_CWD=/path/to/project node app.js</pre>
+    </div>
+
+    <h3>Auto-install fails with "&lt;pm&gt; exited with code N"</h3>
+    <p>The detected package manager isn't on PATH, or it failed for project-specific reasons (lockfile conflicts, registry unreachable, permission errors). Try the install manually to surface the real error:</p>
+    <div class="window">
+      <div class="window-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="window-title">terminal</span></div>
+<pre><span class="tok-op">$</span> npm install &lt;package-name&gt;</pre>
+    </div>
+    <p>Or force a different package manager: <code>ENTIRETY_PM=npm node app.js</code>.</p>
+
+    <h3>Workspaces / monorepos</h3>
+    <p>Auto-install runs <code>&lt;pm&gt; install &lt;pkg&gt;</code> in the directory containing the nearest <code>package.json</code>. In a workspace package, that's the package directory — exactly right. From a workspace root, that's the root. If you need a different target, set <code>ENTIRETY_CWD</code>.</p>
+
+    <h3>Read-only filesystems / containers</h3>
+    <p>Set <code>ENTIRETY_NO_INSTALL=1</code> and pre-install all packages at image build time.</p>
+
+    <!-- ═══ FAQ ═══ -->
+    <h2 id="faq">FAQ <a href="#faq" class="heading-anchor">#</a></h2>
+
+    <h3>Will this work in the browser?</h3>
+    <p>Not in v0.3. The auto-install path is Node-specific (it spawns <code>npm</code>). A CDN loader plugin (esm.sh / jspm) is planned for v2.</p>
+
+    <h3>What about TypeScript?</h3>
+    <p>The default export is typed as <code>any</code> for now — runtime dispatch is intrinsically untyped. v2 ships generated <code>.d.ts</code> from the alias map and each package's declarations.</p>
+
+    <h3>Does Entirety bundle every npm package?</h3>
+    <p>No. Entirety itself ships ~10 KB of source and zero dependencies. The libraries you reach for are installed on demand into your own <code>node_modules</code>.</p>
+
+    <h3>What happens if I use this in production?</h3>
+    <p>It's perfectly fine for server-side Node where <code>node_modules</code> is part of the deployable artifact. Pre-install everything at build time (or use <code>ENTIRETY_NO_INSTALL=1</code>) so production never spawns installs at runtime.</p>
+
+    <h3>Can I use Entirety alongside regular imports?</h3>
+    <p>Yes. They're independent. Use Entirety for prototyping speed and explicit imports where you want bundler tree-shaking and TS types.</p>
+
+    <hr />
+
+    <div class="callout tip">
+      <p><strong>Found a bug or have a feature request?</strong> Reach out on <a href="https://www.npmjs.com/package/entirety" target="_blank" rel="noopener">npm</a> or via the contact details on the package page.</p>
+    </div>
+
+  </main>
+</div>
+
+<!-- ─── Footer ──────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div>© 2026 entirety · MIT licensed · v0.3.0</div>
+    <div class="links">
+      <a href="index.html">Home</a>
+      <a href="https://www.npmjs.com/package/entirety" target="_blank" rel="noopener">npm</a>
+      <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <div class="footer-credit">
+      Made by<a href="https://www.vazulies.com" target="_blank" rel="noopener">Vazulies</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ─── TOC active highlight ───────────────────────────────────────────
+const headings = Array.from(document.querySelectorAll(".main h2[id], .main h3[id]"));
+const tocLinks = new Map();
+document.querySelectorAll(".sidebar a[href^='#']").forEach((a) => {
+  tocLinks.set(a.getAttribute("href").slice(1), a);
+});
+
+const activate = (id) => {
+  for (const link of tocLinks.values()) link.classList.remove("active");
+  const link = tocLinks.get(id);
+  if (link) link.classList.add("active");
+};
+
+const obs = new IntersectionObserver(
+  (entries) => {
+    // Find the entry closest to the top that's visible
+    const visible = entries
+      .filter((e) => e.isIntersecting)
+      .sort((a, b) => a.target.getBoundingClientRect().top - b.target.getBoundingClientRect().top);
+    if (visible[0]) activate(visible[0].target.id);
+  },
+  { rootMargin: "-80px 0px -70% 0px", threshold: 0 }
+);
+headings.forEach((h) => obs.observe(h));
+
+// ─── Smooth scroll on anchor click ──────────────────────────────────
+document.querySelectorAll("a[href^='#']").forEach((a) => {
+  a.addEventListener("click", (e) => {
+    const id = a.getAttribute("href").slice(1);
+    const target = document.getElementById(id);
+    if (!target) return;
+    e.preventDefault();
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    history.replaceState(null, "", "#" + id);
+  });
+});
+
+// ─── Mobile sidebar toggle ──────────────────────────────────────────
+const sidebar = document.getElementById("sidebar");
+const toggle = sidebar.querySelector(".sidebar-toggle");
+const isMobile = () => window.matchMedia("(max-width: 1000px)").matches;
+
+const setCollapsed = (collapsed) => {
+  sidebar.dataset.collapsed = collapsed ? "true" : "false";
+  toggle.setAttribute("aria-expanded", String(!collapsed));
+};
+
+if (isMobile()) setCollapsed(true);
+toggle.addEventListener("click", () => setCollapsed(sidebar.dataset.collapsed !== "true"));
+
+// Close sidebar when a TOC link is tapped on mobile
+document.querySelectorAll(".sidebar a[href^='#']").forEach((a) => {
+  a.addEventListener("click", () => { if (isMobile()) setCollapsed(true); });
+});
+
+// ─── Reveal on scroll ───────────────────────────────────────────────
+const reveal = new IntersectionObserver(
+  (entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) {
+        e.target.classList.add("in");
+        reveal.unobserve(e.target);
+      }
+    }
+  },
+  { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+);
+document.querySelectorAll(".main h2, .main h3, .window, .callout, .docs-table, .method")
+  .forEach((el) => { el.classList.add("reveal"); reveal.observe(el); });
+</script>
+
+</body>
+</html>

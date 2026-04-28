@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Entirety — One package. Every library.</title>
+<meta name="description" content="Lazy-load and auto-install any npm module through a single namespace." />
+<meta name="theme-color" content="#FFFFFF" />
+<link rel="icon" type="image/svg+xml" href="icon.svg" />
+
+<style>
+/* ─── Design tokens (monochrome) ────────────────────────────────────── */
+:root {
+  --bg:              #FFFFFF;
+  --bg-alt:          #F7F7F7;
+  --surface:         #FAFAFA;
+  --surface-elev:    #F2F2F2;
+  --border:          rgba(0,0,0,0.09);
+  --border-strong:   rgba(0,0,0,0.22);
+  --text:            #000000;
+  --text-muted:      rgba(0,0,0,0.62);
+  --text-dim:        rgba(0,0,0,0.42);
+
+  --font-display: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+  --font-body:    "SF Pro Text", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+  --font-mono:    "SF Mono", "JetBrains Mono", Menlo, Monaco, "Cascadia Code", monospace;
+
+  --container: 1200px;
+  --section-py: clamp(96px, 14vw, 180px);
+
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Reset + base ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+::selection { background: #000; color: #fff; }
+
+/* ─── Layout ─────────────────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+section { padding-block: var(--section-py); position: relative; }
+
+/* ─── Typography ─────────────────────────────────────────────────────── */
+.display {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 7.5vw, 6.75rem);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  font-weight: 700;
+  margin: 0;
+}
+.h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.6vw, 3.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+  margin: 0 0 20px;
+}
+.h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+.eyebrow {
+  display: inline-block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.lede {
+  font-size: clamp(1.125rem, 1.5vw, 1.375rem);
+  color: var(--text-muted);
+  line-height: 1.5;
+  max-width: 62ch;
+  margin: 24px auto 0;
+}
+.accent-line {
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* ─── Nav ────────────────────────────────────────────────────────────── */
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  background: rgba(255,255,255,0.72);
+  border-bottom: 1px solid transparent;
+  transition: border-color 300ms var(--ease);
+}
+.nav.scrolled { border-bottom-color: var(--border); }
+.nav-inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  font-size: 1.25rem;
+}
+.brand-dot {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+.nav-links { display: flex; gap: 28px; align-items: center; }
+.nav-links a {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: color 200ms var(--ease);
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a.pill {
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: #1D1D1F;
+  color: #fff;
+  font-weight: 600;
+}
+.nav-links a.pill:hover { background: #000; color: #fff; }
+@media (max-width: 640px) {
+  .nav-links a:not(.pill):not(.primary-link) { display: none; }
+}
+
+/* ─── Hero ───────────────────────────────────────────────────────────── */
+.hero {
+  padding-top: calc(var(--section-py) + 40px);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero > .container { position: relative; z-index: 1; }
+
+.cta-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: -0.005em;
+  transition: transform 200ms var(--ease), background 200ms var(--ease), box-shadow 200ms var(--ease), color 200ms var(--ease);
+  will-change: transform;
+}
+.btn-primary {
+  background: #000;
+  color: #fff;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.12);
+}
+.btn-primary:hover {
+  transform: translateY(-2px) scale(1.025);
+  box-shadow: 0 14px 32px rgba(0,0,0,0.22);
+}
+.btn-secondary {
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  background: rgba(0,0,0,0.02);
+}
+.btn-secondary:hover {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.34);
+  transform: translateY(-2px) scale(1.025);
+}
+
+.install-card {
+  margin: 52px auto 0;
+  max-width: 480px;
+  padding: 14px 18px 14px 22px;
+  background: rgba(0,0,0,0.03);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  backdrop-filter: blur(10px);
+}
+.install-card .prompt { color: var(--text-dim); user-select: none; }
+.install-card code { color: var(--text); }
+.install-card .copy-btn {
+  margin-left: auto;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.06);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  transition: background 180ms var(--ease), color 180ms var(--ease);
+}
+.install-card .copy-btn:hover { background: rgba(0,0,0,0.12); color: var(--text); }
+.install-card .copy-btn.copied { background: #000; color: #fff; }
+
+/* ─── Window / Code block ───────────────────────────────────────────── */
+.window {
+  max-width: 920px;
+  margin: 100px auto 0;
+  background: #FAFAFA;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.02) inset,
+    0 24px 56px -20px rgba(0,0,0,0.18);
+  overflow: hidden;
+  text-align: left;
+}
+.window-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  background: rgba(0,0,0,0.025);
+  border-bottom: 1px solid var(--border);
+}
+.dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(0,0,0,0.18); }
+.window-title {
+  margin-left: 14px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+.window pre {
+  margin: 0;
+  padding: 28px 32px;
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text);
+}
+
+/* Syntax tokens — GitHub-light palette */
+.tok-cmt { color: #6E7781; font-style: italic; }
+.tok-kw  { color: #CF222E; }
+.tok-str { color: #0A3069; }
+.tok-num { color: #0550AE; }
+.tok-fn  { color: #8250DF; }
+.tok-id  { color: #1F2328; }
+.tok-op  { color: rgba(31,35,40,0.55); }
+.tok-out { color: #116329; }   /* stdout green */
+.tok-sys { color: #0969DA; }   /* [entirety] installer tag */
+
+/* ─── Features grid ─────────────────────────────────────────────────── */
+.features { background: var(--bg); }
+.features-head { text-align: center; margin-bottom: 80px; }
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+@media (max-width: 900px) {
+  .feature-grid { grid-template-columns: 1fr; }
+}
+.feature {
+  background: #FAFAFA;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 40px 32px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 300ms var(--ease), transform 300ms var(--ease), box-shadow 300ms var(--ease), background 300ms var(--ease);
+}
+.feature:hover {
+  border-color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px -12px rgba(0,0,0,0.14);
+  background: #fff;
+}
+.feature .icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.04);
+  border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+  margin-bottom: 28px;
+  position: relative;
+  z-index: 1;
+  transition: transform 380ms var(--ease-out), background 280ms var(--ease), border-color 280ms var(--ease);
+}
+.feature .icon svg { stroke: var(--text); transition: stroke 260ms var(--ease); }
+.feature:hover .icon {
+  transform: rotate(-4deg) scale(1.1);
+  background: #000;
+  border-color: #000;
+}
+.feature:hover .icon svg { stroke: #fff; }
+.feature p { color: var(--text-muted); margin: 0; position: relative; z-index: 1; }
+.feature h3 { position: relative; z-index: 1; }
+
+/* ─── Split / deep-dive ─────────────────────────────────────────────── */
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 72px;
+  align-items: center;
+}
+@media (max-width: 900px) {
+  .split { grid-template-columns: 1fr; gap: 48px; }
+}
+.split p { color: var(--text-muted); font-size: 1.0625rem; }
+.split .window { margin: 0; }
+
+/* ─── Before/After ──────────────────────────────────────────────────── */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 60px;
+}
+@media (max-width: 900px) {
+  .compare { grid-template-columns: 1fr; }
+}
+.compare .card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  position: relative;
+}
+.compare .card.after {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+/* Inverted card: GitHub-dark syntax palette */
+.compare .card.after pre { color: #E6EDF3; }
+.compare .card.after p { color: rgba(255,255,255,0.7); }
+.compare .card.after .tok-cmt { color: #8B949E; font-style: italic; }
+.compare .card.after .tok-kw  { color: #FF7B72; }
+.compare .card.after .tok-str { color: #A5D6FF; }
+.compare .card.after .tok-num { color: #79C0FF; }
+.compare .card.after .tok-fn  { color: #D2A8FF; }
+.compare .card.after .tok-id  { color: #E6EDF3; }
+.compare .card.after .tok-op  { color: rgba(230,237,243,0.55); }
+.compare .card.after .tok-out { color: #7EE787; }
+.compare .card.after .tok-sys { color: #79C0FF; }
+.compare .label {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+.compare .after .label {
+  color: #fff;
+  font-weight: 800;
+}
+.compare pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre;
+  overflow-x: auto;
+}
+.compare .card p { color: var(--text-muted); margin-top: 20px; font-size: 0.9375rem; }
+
+/* ─── Final CTA ─────────────────────────────────────────────────────── */
+.final {
+  text-align: center;
+  border-top: 1px solid var(--border);
+  background: var(--bg-alt);
+}
+.final h2 { margin-bottom: 24px; }
+.final .install-card { margin-top: 40px; }
+
+/* ─── Footer ────────────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 48px 24px;
+  color: var(--text-dim);
+  font-size: 0.875rem;
+}
+footer .footer-inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+footer a { color: var(--text-muted); transition: color 180ms var(--ease); }
+footer a:hover { color: var(--text); }
+footer .links { display: flex; gap: 24px; flex-wrap: wrap; }
+
+footer .footer-credit {
+  flex-basis: 100%;
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+  color: var(--text-dim);
+  letter-spacing: 0.01em;
+}
+footer .footer-credit a {
+  color: var(--text);
+  font-weight: 600;
+  margin-left: 4px;
+  position: relative;
+  display: inline-block;
+}
+footer .footer-credit a::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 280ms var(--ease-out);
+}
+footer .footer-credit a:hover { color: var(--text); }
+footer .footer-credit a:hover::after { transform: scaleX(1); }
+
+/* ─── Animations ──────────────────────────────────────────────── */
+
+/* Scroll-triggered reveal (fade + slide-up by default) */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 900ms var(--ease-out), transform 900ms var(--ease-out);
+}
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+/* Reveal direction variants */
+.reveal-left  { transform: translateX(-44px); }
+.reveal-right { transform: translateX(44px); }
+.reveal-scale { transform: scale(0.94); }
+.reveal-fade  { transform: none; }
+.reveal-left.in,
+.reveal-right.in { transform: translateX(0); }
+.reveal-scale.in { transform: scale(1); }
+
+/* Auto-stagger inside grids */
+.feature-grid > .reveal:nth-child(2) { transition-delay: 90ms; }
+.feature-grid > .reveal:nth-child(3) { transition-delay: 180ms; }
+.compare > .reveal:nth-child(2) { transition-delay: 110ms; }
+
+/* Continuous motion */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+@keyframes blink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes copy-pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes eyebrow-glow {
+  0%, 100% { opacity: 0.62; }
+  50%      { opacity: 1; }
+}
+
+.brand-dot { animation: float 4.2s ease-in-out infinite; }
+
+.terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.05em;
+  background: currentColor;
+  vertical-align: text-bottom;
+  animation: blink 1.05s steps(2) infinite;
+  margin-left: 4px;
+  border-radius: 1px;
+}
+
+/* Window: subtle lift on hover */
+.window { transition: transform 480ms var(--ease-out), box-shadow 480ms var(--ease-out); }
+.window:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.02) inset,
+    0 36px 80px -24px rgba(0,0,0,0.26);
+}
+
+/* Eyebrow: a slow opacity breathe */
+.eyebrow {
+  color: var(--text);
+  animation: eyebrow-glow 5s ease-in-out infinite;
+}
+
+/* Copy button success burst */
+.install-card .copy-btn.copied { animation: copy-pulse 420ms var(--ease-out); }
+
+/* Reduced motion: kill everything */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale,
+  .reveal-fade { opacity: 1; transform: none; transition: none; }
+  .brand-dot,
+  .terminal-cursor,
+  .eyebrow,
+  .install-card .copy-btn.copied { animation: none; }
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── Nav ─────────────────────────────────────────────────────────── -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#" class="brand">
+      <img class="brand-dot" src="icon.svg" alt="" aria-hidden="true" />
+      <span>Entirety</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="docs.html">Docs</a>
+      <a href="https://www.npmjs.com/package/entirety" target="_blank" rel="noopener">npm</a>
+      <a href="docs.html" class="pill">Get started</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── Hero ────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <span class="eyebrow reveal" data-delay="0">v0.3 · browser & framework support</span>
+    <h1 class="display">
+      <span class="reveal" data-delay="80">One package.</span><br />
+      <span class="reveal accent-line" data-delay="180">Every library.</span>
+    </h1>
+    <p class="lede reveal" data-delay="320">
+      Lazy-load and auto-install any npm module through a single namespace.
+      No bundler glue. No dependency list. Just use it.
+    </p>
+
+    <div class="install-card reveal" data-delay="440" role="group" aria-label="Install command">
+      <span class="prompt">$</span>
+      <code id="install-cmd">npm install entirety</code>
+      <button class="copy-btn" type="button" data-copy="npm install entirety" aria-label="Copy install command">Copy</button>
+    </div>
+
+    <div class="cta-row reveal" data-delay="560">
+      <a href="#features" class="btn btn-primary">See it in action ↓</a>
+      <a href="https://www.npmjs.com/package/entirety" target="_blank" rel="noopener" class="btn btn-secondary">View on npm</a>
+    </div>
+
+    <!-- Terminal mock -->
+    <div class="window reveal reveal-scale" data-delay="720" aria-hidden="false">
+      <div class="window-bar">
+        <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+        <span class="window-title">~/my-app · node index.js</span>
+      </div>
+<pre><span class="tok-cmt">// No installs. No imports. Just run.</span>
+<span class="tok-kw">import</span> <span class="tok-id">Entirety</span> <span class="tok-kw">from</span> <span class="tok-str">"entirety"</span>;
+
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">Lodash</span>.<span class="tok-fn">camelCase</span>(<span class="tok-str">"hello world"</span>);
+<span class="tok-sys">[entirety] installing lodash via npm…</span>
+<span class="tok-out">→ "helloWorld"</span>
+
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">Axios</span>.<span class="tok-fn">get</span>(<span class="tok-str">"https://api.github.com/zen"</span>);
+<span class="tok-sys">[entirety] installing axios via npm…</span>
+<span class="tok-out">→ "Non-blocking I/O is better than blocking I/O."</span>
+
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-fn">use</span>(<span class="tok-str">"nanoid"</span>).<span class="tok-fn">nanoid</span>();
+<span class="tok-sys">[entirety] installing nanoid via npm…</span>
+<span class="tok-out">→ "V1StGXR8_Z5jdHi6B-myT"</span><span class="terminal-cursor" aria-hidden="true"></span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Features ────────────────────────────────────────────────────── -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="features-head reveal">
+      <span class="eyebrow">Three ideas. One package.</span>
+      <h2 class="h2">Built on primitives<br />you already trust.</h2>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature reveal">
+        <div class="icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v4" /><path d="M12 18v4" />
+            <path d="M4.93 4.93l2.83 2.83" /><path d="M16.24 16.24l2.83 2.83" />
+            <path d="M2 12h4" /><path d="M18 12h4" />
+            <path d="M4.93 19.07l2.83-2.83" /><path d="M16.24 7.76l2.83-2.83" />
+          </svg>
+        </div>
+        <h3 class="h3">Lazy by default.</h3>
+        <p>Property access defers to <code style="font-family:var(--font-mono);color:var(--text)">import()</code>. Unused libraries cost exactly zero at runtime.</p>
+      </div>
+
+      <div class="feature reveal">
+        <div class="icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+        </div>
+        <h3 class="h3">It installs itself.</h3>
+        <p>Missing package? Entirety detects your pm — npm, pnpm, yarn, bun — runs the install, and retries the import. Transparently.</p>
+      </div>
+
+      <div class="feature reveal">
+        <div class="icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M2 12h20" />
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+          </svg>
+        </div>
+        <h3 class="h3">Every package, one namespace.</h3>
+        <p><code style="font-family:var(--font-mono);color:var(--text)">Entirety.Lodash</code>. <code style="font-family:var(--font-mono);color:var(--text)">Entirety.Axios</code>. Or <code style="font-family:var(--font-mono);color:var(--text)">Entirety.use("anything")</code>. Same ergonomics for the whole ecosystem.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Compare ─────────────────────────────────────────────────────── -->
+<section id="compare" style="background: var(--bg-alt); border-block: 1px solid var(--border);">
+  <div class="container">
+    <div class="features-head reveal">
+      <span class="eyebrow">Before / After</span>
+      <h2 class="h2">Less boilerplate.<br />More doing.</h2>
+    </div>
+
+    <div class="compare">
+      <div class="card reveal">
+        <span class="label">Before</span>
+<pre><span class="tok-kw">import</span> _ <span class="tok-kw">from</span> <span class="tok-str">"lodash"</span>;
+<span class="tok-kw">import</span> axios <span class="tok-kw">from</span> <span class="tok-str">"axios"</span>;
+<span class="tok-kw">import</span> dayjs <span class="tok-kw">from</span> <span class="tok-str">"dayjs"</span>;
+<span class="tok-kw">import</span> { nanoid } <span class="tok-kw">from</span> <span class="tok-str">"nanoid"</span>;
+<span class="tok-kw">import</span> { z } <span class="tok-kw">from</span> <span class="tok-str">"zod"</span>;
+<span class="tok-cmt">// + npm install every one of them
+// + remember which exports are named
+// + remember which are default
+// + remember which need peer deps</span></pre>
+        <p>Five imports. Five installs. Five shapes to memorize.</p>
+      </div>
+
+      <div class="card after reveal">
+        <span class="label">After</span>
+<pre><span class="tok-kw">import</span> <span class="tok-id">Entirety</span> <span class="tok-kw">from</span> <span class="tok-str">"entirety"</span>;
+
+<span class="tok-cmt">// That's the whole import section.</span>
+
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">Lodash</span>.<span class="tok-fn">camelCase</span>(<span class="tok-id">x</span>);
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-id">Axios</span>.<span class="tok-fn">get</span>(<span class="tok-id">url</span>);
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-fn">use</span>(<span class="tok-str">"dayjs"</span>);
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-fn">use</span>(<span class="tok-str">"nanoid"</span>).<span class="tok-fn">nanoid</span>();
+<span class="tok-kw">await</span> <span class="tok-id">Entirety</span>.<span class="tok-fn">use</span>(<span class="tok-str">"zod"</span>).<span class="tok-id">z</span>.<span class="tok-fn">string</span>();</pre>
+        <p>One import. One install. Entirety handles the rest on first access.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Final CTA ───────────────────────────────────────────────────── -->
+<section class="final">
+  <div class="container">
+    <div class="reveal">
+      <span class="eyebrow">Ready when you are</span>
+      <h2 class="h2">Start using entirety<br />in under 30 seconds.</h2>
+      <p class="lede">Works on Node 20+. ESM native. No build step required.</p>
+    </div>
+
+    <div class="install-card reveal" role="group" aria-label="Install command">
+      <span class="prompt">$</span>
+      <code>npm install entirety</code>
+      <button class="copy-btn" type="button" data-copy="npm install entirety" aria-label="Copy install command">Copy</button>
+    </div>
+
+    <div class="cta-row reveal">
+      <a href="https://www.npmjs.com/package/entirety" target="_blank" rel="noopener" class="btn btn-primary">View on npm →</a>
+      <a href="docs.html" class="btn btn-secondary">Read the docs</a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Footer ──────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div>© 2026 entirety · MIT licensed · v0.3.0</div>
+    <div class="links">
+      <a href="https://www.npmjs.com/package/entirety" target="_blank" rel="noopener">npm</a>
+      <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <div class="footer-credit">
+      Made by<a href="https://www.vazulies.com" target="_blank" rel="noopener">Vazulies</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ─── Copy-to-clipboard ──────────────────────────────────────────────
+document.querySelectorAll("[data-copy]").forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    const text = btn.getAttribute("data-copy");
+    try {
+      await navigator.clipboard.writeText(text);
+      const original = btn.textContent;
+      btn.textContent = "Copied";
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.classList.remove("copied");
+      }, 1600);
+    } catch (_) {
+      // clipboard blocked — select fallback
+      const range = document.createRange();
+      range.selectNodeContents(btn.previousElementSibling);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  });
+});
+
+// ─── Scroll reveal ──────────────────────────────────────────────────
+const io = new IntersectionObserver(
+  (entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) {
+        e.target.classList.add("in");
+        io.unobserve(e.target);
+      }
+    }
+  },
+  { threshold: 0.12, rootMargin: "0px 0px -60px 0px" }
+);
+document.querySelectorAll(".reveal").forEach((el) => {
+  // Explicit data-delay wins; otherwise CSS :nth-child stagger applies.
+  if (el.dataset.delay !== undefined) {
+    el.style.transitionDelay = parseInt(el.dataset.delay, 10) + "ms";
+  }
+  io.observe(el);
+});
+
+// ─── Nav background on scroll ───────────────────────────────────────
+const nav = document.getElementById("nav");
+const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 8);
+onScroll();
+window.addEventListener("scroll", onScroll, { passive: true });
+</script>
+
+</body>
+</html>
